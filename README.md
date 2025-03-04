@@ -33,7 +33,7 @@ Esta API permite gestionar pedidos en un e-commerce utilizando una arquitectura 
 - Tener instalado [Docker](https://www.docker.com/) y asegurarse de que el servicio está en ejecución.
 - Clonar el repositorio incluyendo los submódulos:
   ```sh
-  git clone --recurse-submodules https://github.com/tu-usuario/mims-prueba.git
+  git clone --recurse-submodules https://github.com/BryanBrinez/mims-prueba
   ```
 - Acceder al directorio del proyecto:
   ```sh
