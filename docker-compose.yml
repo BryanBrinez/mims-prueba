@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  nats-server:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+
+  database:
+    container_name: database
+    image: postgres:16.2
+    restart: always
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=prueba
+
+  client-gateway:
+    build: ./gateway
+    volumes:
+      - ./gateway:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NATS_SERVER=nats://nats-server:4222
+    depends_on:
+      - nats-server
+      - auth-ms
+
+  auth-ms:
+    build: ./auth-ms
+    volumes:
+      - ./auth-ms:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    restart: always
+    environment:
+      - PORT=3001
+      - NATS_SERVER=nats://nats-server:4222
+      - DATABASE_URL=postgresql://postgres:123456@database:5432/prueba?schema=auth
+      - JWT_SECRET=Muysecret
+    depends_on:
+      - database
+      - nats-server
+  orders-ms:
+    build: ./orders-ms
+    volumes:
+      - ./orders-ms:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    restart: always
+    environment:
+      - PORT=3002
+      - NATS_SERVER=nats://nats-server:4222
+      - DATABASE_URL=postgresql://postgres:123456@database:5432/prueba?schema=orders
+      - JWT_SECRET=Muysecret
+    depends_on:
+      - database
+      - nats-server
+
+volumes:
+  postgres:
